@@ -59,8 +59,14 @@ with st.form("job_form"):
 # --- FILTER + DISPLAY ---
 st.subheader("📊 View & Filter Applications")
 if not df.empty:
-    status_filter = st.multiselect("Filter by Status", df["Application Status"].unique(), default=list(df["Application Status"].unique()))
-    filtered_df = df[df["Application Status"].isin(status_filter)]
+    status_filter = st.multiselect("Filter by Status", df["Application Status"].unique())
+
+# ✅ If no status selected, show everything
+    if status_filter:
+        filtered_df = df[df["Application Status"].isin(status_filter)]
+    else:
+        filtered_df = df.copy()
+
     st.dataframe(filtered_df)
     st.download_button("📥 Download Filtered CSV", filtered_df.to_csv(index=False), file_name="filtered_job_apps.csv")
 else:
@@ -69,7 +75,9 @@ else:
 # --- EDIT EXISTING ENTRY ---
 st.subheader("✏️ Edit an Existing Application")
 if not df.empty:
-    selected_index = st.selectbox("Select an application to edit (by index):", df.index)
+    edit_options = {f"{row['Company']} – {row['Position Title']} (#{i})": i for i, row in df.iterrows()}
+    selected_label = st.selectbox("Select an application to edit:", list(edit_options.keys()))
+    selected_index = edit_options[selected_label]
     row = df.loc[selected_index]
 
     with st.form("edit_form"):
@@ -93,7 +101,9 @@ else:
 # --- DELETE APPLICATION ---
 st.subheader("🗑️ Delete an Application")
 if not df.empty:
-    delete_index = st.selectbox("Select application to delete (by index):", df.index, key="delete_selector")
+    delete_options = {f"{row['Company']} – {row['Position Title']} (#{i})": i for i, row in df.iterrows()}
+    delete_label = st.selectbox("Select application to delete:", list(delete_options.keys()), key="delete_selector")
+    delete_index = delete_options[delete_label]
 
     if st.button("Delete Selected Application"):
         deleted_row = df.loc[delete_index]
