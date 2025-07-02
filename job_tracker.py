@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
+
 # Load or initialize data
 csv_file = "job_tracker.csv"
 columns = [
